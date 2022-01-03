@@ -1,0 +1,4 @@
+pwntools
+pyradamsa
+python-nmap
+scapy
