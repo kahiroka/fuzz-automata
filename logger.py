@@ -5,6 +5,7 @@ from pwn import *
 HEADER='''#!/bin/sh
 if [ $# != 1 ]; then
   echo usage: ./portable-poc-template.sh IPADDRESS
+  exit
 fi
 IP=$1
 PORT=
