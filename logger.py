@@ -23,8 +23,9 @@ class Logger():
     self.logfile = None
     self.logfp  = None
     self.repfile = None
-    self.logfp  = None
+    self.repfp  = None
     self.enabled = False
+    self.index = []
 
   def enable(self):
     if not self.enabled:
@@ -50,15 +51,48 @@ class Logger():
     self.repfile = repfile
     self.repfp = open(self.repfile, 'r')
 
+    pos = 0
+    #for line in self.repfp:
+    while True:
+      line = self.repfp.readline()
+      if not line:
+        break
+      log = json.loads(line)
+      if log['cmd'] == 'con':
+        self.index.append(pos)
+      elif log['cmd'] == 'dis':
+        pass
+
+      pos = self.repfp.tell()
+
+    self.index.append(pos)
+    self.repfp.seek(0)
+
   def next(self):
     for line in self.repfp:
       if line[0] == '#':
         continue
-      j = json.loads(line)
-      return j
+      log = json.loads(line)
+      return log
+
+  def get_len(self):
+    return len(self.index) - 1
 
   def seek(self, pos):
-    self.repfp.seek(pos)
+    if pos < len(self.index) - 1:
+      self.repfp.seek(self.index[pos])
+      return self.index[pos]
+    else:
+      return -1
+
+  def cut_out(self, start, size):
+    self.seek(start)
+    with open(self.repfile + '.poc', 'w') as fw:
+      left = self.index[start+size] - self.index[start]
+      while left:
+        data = self.repfp.read(left)
+        fw.write(data)
+        left = left - len(data)
 
   def export(self, logfile, outfile):
     port = '0'
