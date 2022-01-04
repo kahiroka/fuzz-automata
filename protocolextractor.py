@@ -9,12 +9,13 @@ class ProtocolExtractor():
     packets = rdpcap(pcap)
     self.protocols = {} # key: dport
 
+    flags = {}
     for packet in packets:
       ip = packet.payload
       if IP in packet and ip.dst == dstip:
         if ip.proto == 6 or ip.proto == 17: # tcp or udp
           xxp = ip.payload
-          if len(xxp.payload) > 0 and len(packet) < 1514: # FIXME
+          if len(xxp.payload) > 0:
             payload = bytes(xxp.payload)
             sport = str(xxp.sport)
             dport = str(xxp.dport)
@@ -22,7 +23,14 @@ class ProtocolExtractor():
 
             if not dport in self.protocols:
               self.protocols[dport] = Protocol(name='unknown', proto=proto, dport=dport)
-            self.protocols[dport].append(b64e(payload).decode(), sport)
+            if sport in flags and flags[sport]: # concat segments
+              flags.pop(sport)
+              self.protocols[dport].append(b64e(payload).decode(), sport, True)
+            else:
+              self.protocols[dport].append(b64e(payload).decode(), sport)
+
+            if proto == 'tcp' and not xxp.flags & 0x08: # simple logic using psh
+              flags[sport] = True
 
   def save(self, file):
     ps = ProtocolSet(name='unknown')

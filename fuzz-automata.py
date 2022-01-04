@@ -32,7 +32,7 @@ python3 fuzz-automata.py -log2sh fuzz.log -out poc.sh
   argparser.add_argument('-proto', nargs='?', default=None, type=str, dest='proto', help='limit to the protocol: tcp|udp (optional)')
   argparser.add_argument('-pileup', nargs='?', default=0, dest='pileup', help='pile up payloads (optional)')
   argparser.add_argument('-replay', nargs='?', type=str, dest='replay', help='replay the log to a specified ip address')
-  argparser.add_argument('-proxy', nargs='?', type=str, dest='proxy', help='pass http requests in a seeds file to the specified proxy for fuzzing')
+  argparser.add_argument('-proxy', nargs='?', type=str, dest='proxy', help='pass http requests in a seeds file to the specified proxy for fuzzing (optional)')
   argparser.add_argument('-binsearch', action='store_true', dest='binsearch', help='binary search for packets that cause a target to halt (optional)')
 
   return argparser.parse_args()

@@ -1,3 +1,6 @@
+from base64 import b64encode as b64e
+from base64 import b64decode as b64d
+
 class Protocol(dict):
   def __init__(self, name='', proto='tcp', dport='0', type='oneshots'):
     self.proto = {}
@@ -8,11 +11,16 @@ class Protocol(dict):
     self.proto['payloads'] = {} # {src_port_num:[payload1, payload2, ...], }
     dict.__init__(self, self.proto)
 
-  def append(self, payload, sport='0'):
+  def append(self, payload, sport='0', concat=False):
     if not sport in self.proto['payloads']:
       self.proto['payloads'][sport] = []
 
-    self.proto['payloads'][sport].append(payload)
+    if concat:
+      prev = self.proto['payloads'][sport][-1]
+      merged = b64e(b64d(prev) + b64d(payload)).decode()
+      self.proto['payloads'][sport][-1] = merged
+    else:
+      self.proto['payloads'][sport].append(payload)
     self.update_type()
 
   # heuristic: just remove same size payloads

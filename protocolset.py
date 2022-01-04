@@ -27,7 +27,7 @@ class ProtocolSet():
     with open(file, 'w') as f:
       json.dump(self.ps, f, indent=2)
 
-  def merge_load(self, file): # TODO
+  def merge_load(self, file):
     with open(file, 'r') as f:
       ps = json.load(f)
       if not self.ps['name']:
