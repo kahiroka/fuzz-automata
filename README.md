@@ -27,6 +27,6 @@ A log file (yyyymmdd-hhmmss.log) is generated per fuzzing and it can be used for
 
     $ python3 ./fuzz-automata.py -replay fuzz.log -ip x.x.x.x [-binsearch]
 
-With '-log2sh' option you can generate a portable shell scipt from a log file.
+With '-log2sh' option you can generate a portable shell script from a log file.
 
     $ python3 ./fuzz-automata.py -log2sh fuzz.log -out poc.sh
