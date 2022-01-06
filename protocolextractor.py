@@ -11,26 +11,35 @@ class ProtocolExtractor():
 
     flags = {}
     for packet in packets:
+      #print(packet.show(dump=True))
       ip = packet.payload
       if IP in packet and ip.dst == dstip:
         if ip.proto == 6 or ip.proto == 17: # tcp or udp
           xxp = ip.payload
+          sport = str(xxp.sport)
+          dport = str(xxp.dport)
+
+          tag = ip.src+':'+sport
+          if ip.proto == 6 and xxp.flags == 0x12: # SYN,ACK
+            flags[tag] = 'ignore' # ignore client side port
+
           if len(xxp.payload) > 0:
             payload = bytes(xxp.payload)
-            sport = str(xxp.sport)
-            dport = str(xxp.dport)
             proto = 'tcp' if ip.proto == 6 else 'udp'
+
+            if tag in flags and flags[tag] == 'ignore':
+              continue
 
             if not dport in self.protocols:
               self.protocols[dport] = Protocol(name='unknown', proto=proto, dport=dport)
-            if sport in flags and flags[sport]: # concat segments
-              flags.pop(sport)
+            if tag in flags and flags[tag] == 'concat': # concat segments
+              flags.pop(tag)
               self.protocols[dport].append(b64e(payload).decode(), sport, True)
             else:
               self.protocols[dport].append(b64e(payload).decode(), sport)
 
             if proto == 'tcp' and not xxp.flags & 0x08: # simple logic using psh
-              flags[sport] = True
+              flags[tag] = 'concat'
 
   def save(self, file):
     ps = ProtocolSet(name='unknown')
