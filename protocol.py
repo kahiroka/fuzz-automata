@@ -2,12 +2,13 @@ from base64 import b64encode as b64e
 from base64 import b64decode as b64d
 
 class Protocol(dict):
-  def __init__(self, name='', proto='tcp', dport='0', type='oneshots'):
+  def __init__(self, name='', proto='tcp', dport='0', type='oneshots', mcast=False):
     self.proto = {}
     self.proto['name'] = name
     self.proto['proto'] = proto
     self.proto['dport'] = dport
     self.proto['type'] = type # oneshots or sequence
+    self.proto['mcast'] = mcast
     self.proto['payloads'] = {} # {src_port_num:[payload1, payload2, ...], }
     dict.__init__(self, self.proto)
 
@@ -31,7 +32,7 @@ class Protocol(dict):
 
     for sport in dict(self.proto['payloads']):
       for payload in list(self.proto['payloads'][sport]):
-        if not len(payload) in id[self.proto['dport']]:
+        if not len(payload) in id[self.proto['dport']] and 4096 >= len(payload):
           id[self.proto['dport']].append(len(payload))
         else:
           self.proto['payloads'][sport].remove(payload)

@@ -5,7 +5,7 @@ from protocol import Protocol
 from protocolset import ProtocolSet
 
 class ProtocolExtractor():
-  def __init__(self, pcap, dstip):
+  def __init__(self, pcap, dstip, inc_mcast=False):
     packets = rdpcap(pcap)
     self.protocols = {} # key: dport
 
@@ -13,7 +13,11 @@ class ProtocolExtractor():
     for packet in packets:
       #print(packet.show(dump=True))
       ip = packet.payload
-      if IP in packet and ip.dst == dstip:
+      if IP in packet and inc_mcast and int(packet.dst[:2],16) & 0x01 and ip.src != dstip:
+        mcast = True
+      else:
+        mcast = False
+      if IP in packet and (ip.dst == dstip or mcast):
         if ip.proto == 6 or ip.proto == 17: # tcp or udp
           xxp = ip.payload
           sport = str(xxp.sport)
@@ -31,7 +35,7 @@ class ProtocolExtractor():
               continue
 
             if not dport in self.protocols:
-              self.protocols[dport] = Protocol(name='unknown', proto=proto, dport=dport)
+              self.protocols[dport] = Protocol(name='unknown', proto=proto, dport=dport, mcast=mcast)
             if tag in flags and flags[tag] == 'concat': # concat segments
               flags.pop(tag)
               self.protocols[dport].append(b64e(payload).decode(), sport, True)

@@ -34,6 +34,7 @@ python3 fuzz-automata.py -log2sh fuzz.log -out poc.sh
   argparser.add_argument('-replay', nargs='?', type=str, dest='replay', help='replay the log to a specified ip address')
   argparser.add_argument('-proxy', nargs='?', type=str, dest='proxy', help='pass http requests in a seeds file to the specified proxy for fuzzing (optional)')
   argparser.add_argument('-binsearch', action='store_true', dest='binsearch', help='binary search for packets that cause a target to halt (optional)')
+  argparser.add_argument('-multicast', action='store_true', dest='multicast', help='include ip multicast packets from others (optional)')
 
   return argparser.parse_args()
 
@@ -42,7 +43,7 @@ def main():
 
   if args.pcap and args.out and args.ip:
     try:
-      pe = ProtocolExtractor(args.pcap, args.ip)
+      pe = ProtocolExtractor(args.pcap, args.ip, args.multicast)
       pe.save(args.out)
     except FileNotFoundError:
       print("pcap file not found")
