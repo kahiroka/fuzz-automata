@@ -54,6 +54,18 @@ class Protocol(dict):
 
     dict.__init__(self, self.proto)
 
+  def show(self):
+    print(self.proto['name'])
+    print("  proto: " + self.proto['proto'] + "/" + self.proto['dport'])
+    print("  type : " + self.proto['type'] + ", mcast: " + str(self.proto['mcast']))
+    count = 0
+    sumsz = 0
+    for sport in self.proto['payloads']:
+      count = count + len(self.proto['payloads'][sport])
+      for payload in self.proto['payloads'][sport]:
+        sumsz = sumsz + len(b64d(payload))
+    print("  avg# : " + str(int(sumsz/count)) + " bytes x" + str(count))
+
   def get_proto(self):
     return self.proto['proto']
 

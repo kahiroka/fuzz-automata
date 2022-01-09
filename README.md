@@ -13,7 +13,7 @@ No protocol specification is required to perform fuzzing against various protoco
 
 First, collect packets to a target using MITM, then generate a seeds file as below. The target's ip address needs to be specified.
 
-    $ python3 ./fuzz_automata.py -pcap in.pcap -out seeds.json -ip x.x.x.x
+    $ python3 ./fuzz_automata.py -pcap in.pcap -out seeds.json -ip x.x.x.x [-multicast]
 
 Merge seeds files if there are multiple files.
 

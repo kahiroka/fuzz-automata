@@ -65,6 +65,10 @@ class ProtocolSet():
   def get_protocols(self):
     return self.ps['protocols']
 
+  def show(self):
+    for p in self.ps['protocols']:
+      p.show()
+
 def main():
   p = Protocol('http', proto='tcp', dport='80')
   p.append(b64e(('GET / HTTP/1.1\r\n\r\n').encode('UTF-8')).decode())

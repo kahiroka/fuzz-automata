@@ -13,11 +13,12 @@ from proxy import Proxy
 
 def getArgs():
   usage = '''
-python3 fuzz-automata.py -pcap in.pcap -out seeds.json -ip x.x.x.x
+python3 fuzz-automata.py -pcap in.pcap -out seeds.json -ip x.x.x.x [-multicast]
 python3 fuzz-automata.py -out out.json [-minimize] -merge seeds1.json [seeds2.json ...]
 python3 fuzz-automata.py -fuzz seeds.json -ip x.x.x.x [-port #] [-proto tcp|udp] [-pileup #] [-proxy ip:port]
 python3 fuzz-automata.py -replay fuzz.log -ip x.x.x.x [-binsearch]
 python3 fuzz-automata.py -log2sh fuzz.log -out poc.sh
+python3 fuzz-automata.py -show seeds.json
 '''
   
   argparser = ArgumentParser(usage=usage)
@@ -35,6 +36,7 @@ python3 fuzz-automata.py -log2sh fuzz.log -out poc.sh
   argparser.add_argument('-proxy', nargs='?', type=str, dest='proxy', help='pass http requests in a seeds file to the specified proxy for fuzzing (optional)')
   argparser.add_argument('-binsearch', action='store_true', dest='binsearch', help='binary search for packets that cause a target to halt (optional)')
   argparser.add_argument('-multicast', action='store_true', dest='multicast', help='include ip multicast packets from others (optional)')
+  argparser.add_argument('-show', nargs='?', type=str, dest='show', help='show packet info of a json file')
 
   return argparser.parse_args()
 
@@ -80,6 +82,11 @@ def main():
       player.run(args.binsearch)
     except KeyboardInterrupt:
       print("interrupted")
+
+  elif args.show:
+    ps = ProtocolSet()
+    ps.load(args.show)
+    ps.show()
 
   else:
     print("usage: python3 "+ __file__ + " -h")
