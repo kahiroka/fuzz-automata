@@ -19,6 +19,21 @@ class ProtocolExtractor():
         mcast = False
       if IP in packet and (ip.dst == dstip or mcast):
         if ip.proto == 6 or ip.proto == 17: # tcp or udp
+
+          # ip fragment
+          if ip.id in flags:
+            #print("# fragment")
+            sport, dport = flags[ip.id].split(':')
+            self.protocols[dport].append(b64e(bytes(ip.payload)).decode(), sport, True)
+            if ip.flags != 'MF':
+              #print("# end of fragment")
+              flags.pop(ip.id)
+            continue
+          elif ip.flags == 'MF':
+            #print("# begin of fragment")
+            flags[ip.id] = str(ip.payload.sport) + ':' + str(ip.payload.dport)
+            #print(flags[ip.id])
+
           xxp = ip.payload
           sport = str(xxp.sport)
           dport = str(xxp.dport)

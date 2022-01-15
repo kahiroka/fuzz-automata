@@ -55,6 +55,8 @@ class ProtocolSet():
     for p in self.ps['protocols']:
       p.minimize()
 
+    self.ps['protocols'] = [p for p in self.ps['protocols'] if len(p.get_payloads()) != 0]
+
   def get_ports(self):
     ports = {'tcp':[], 'udp':[]}
     for p in self.ps['protocols']:
