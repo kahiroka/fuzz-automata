@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 '''
-Fuzz Automata: Seed-based Random Network Fuzzer
+FuzZ:Automata: Seed-based Random Network Fuzzer
 '''
 from argparse import ArgumentParser
 from pwn import *
