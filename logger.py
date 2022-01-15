@@ -19,17 +19,18 @@ FOOTER='''EOF
 )|$NC '''
 
 class Logger():
-  def __init__(self):
+  def __init__(self, name='0'):
     self.logfile = None
     self.logfp  = None
     self.repfile = None
     self.repfp  = None
     self.enabled = False
+    self.name = name
     self.index = []
 
   def enable(self):
     if not self.enabled:
-      self.logfile = datetime.datetime.today().strftime('%Y%m%d-%H%M%S') + '.log'
+      self.logfile = datetime.datetime.today().strftime('%Y%m%d-%H%M%S') + '-' + self.name + '.log'
       self.logfp = open(self.logfile, 'w')
       self.enabled = True
 

@@ -4,39 +4,41 @@ from protocolset import ProtocolSet
 from fanmap import FaNmap
 from mutator import Mutator
 from logger import Logger
+from multiprocessing import Process
 
 class Fuzzer():
   def __init__(self, file):
     self.ps = ProtocolSet()
     self.ps.load(file)
     self.mutator = Mutator('radamsa')
-    self.logger = Logger()
+    self.proc_list = []
 
-  def _fuzz_oneshot(self, ip, port, proto, payloads):
+  def _fuzz_oneshot(self, logger, ip, port, proto, payloads):
     print("# oneshot mode")
     io = remote(ip, port, typ=proto)
-    self.logger.log({'cmd':'con', 'ip':ip, 'port':port, 'proto':proto})
+    logger.log({'cmd':'con', 'ip':ip, 'port':port, 'proto':proto})
     fuzz = self.mutator.mutate(b64d(payloads[0].encode()))
     io.send(fuzz)
-    self.logger.log({'cmd':'fuz', 'data':b64e(fuzz)})
+    logger.log({'cmd':'fuz', 'data':b64e(fuzz)})
     try:
       ret = io.recvrepeat(0.2)
     except EOFError:
       pass
     finally:
       io.close()
-      self.logger.log({'cmd':'dis'})
+      logger.log({'cmd':'dis'})
 
-  def _fuzz_sequence(self, ip, port, proto, payloads, pileup):
+  def _fuzz_sequence(self, logger, ip, port, proto, payloads, pileup):
     print("# sequence mode")
     # augmentation option
     for i in range(int(pileup)):
       payloads.extend(payloads)
     if pileup > 0:
       print("pileup: 2^" + str(pileup))
+    print(len(payloads))
 
     io = remote(ip, port, typ=proto)
-    self.logger.log({'cmd':'con', 'ip':ip, 'port':port, 'proto':proto})
+    logger.log({'cmd':'con', 'ip':ip, 'port':port, 'proto':proto})
 
     # heuristic: shallow-deep fuzzing
     for i in range(len(payloads)):
@@ -48,16 +50,33 @@ class Fuzzer():
 
         try:
           io.send(fuzz)
-          self.logger.log({'cmd':'fuz', 'data':b64e(fuzz)})
+          logger.log({'cmd':'fuz', 'data':b64e(fuzz)})
           ret = io.recvrepeat(0.2)
         except EOFError:
           print("EOFError")
           break
 
     io.close()
-    self.logger.log({'cmd':'dis'})
+    logger.log({'cmd':'dis'})
 
-  def run(self, ip, port=None, proto=None, pileup=False):
+  def run_mp(self, p, ip, pileup):
+    dport = p.get_dport()
+    proto = p.get_proto()
+    typ = p.get_type()
+    print(dport + "/" + proto)
+    payloads = p.get_payloads()
+    logger = Logger(dport + '-' + proto)
+    logger.enable()
+
+    while True:
+      for sport in payloads:
+        if typ == 'oneshots':
+          for i in range(10):
+            self._fuzz_oneshot(logger, ip, dport, proto, payloads[sport])
+        elif typ == 'sequence':
+          self._fuzz_sequence(logger, ip, dport, proto, payloads[sport], pileup)
+
+  def run(self, ip, port=None, proto=None, pileup=0):
     print("Protocol Set: " + str(self.ps.get_ports()))
     if port == None:
       fn = FaNmap()
@@ -74,21 +93,16 @@ class Fuzzer():
       else:
         active_ports[proto].append(port)
 
-    self.logger.enable()
-    while True:
-      for p in self.ps.get_protocols():
-        dport = p.get_dport()
-        proto = p.get_proto()
-        typ = p.get_type()
-        if dport in active_ports[proto]:
-          print(dport + "/" + proto)
-          payloads = p.get_payloads()
-          for sport in payloads:
-            if typ == 'oneshots':
-              for i in range(10):
-                self._fuzz_oneshot(ip, dport, proto, payloads[sport])
-            elif typ == 'sequence':
-              self._fuzz_sequence(ip, dport, proto, payloads[sport], pileup)
+    for p in self.ps.get_protocols():
+      dport = p.get_dport()
+      proto = p.get_proto()
+      if dport in active_ports[proto]:
+        proc = Process(target=self.run_mp, args=(p, ip, pileup))
+        proc.start()
+        self.proc_list.append(proc)
+
+    for proc in self.proc_list:
+      proc.join()
 
 def main():
   if len(sys.argv) == 3:
