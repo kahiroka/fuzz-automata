@@ -13,22 +13,23 @@ class Fuzzer():
     self.mutator = Mutator('radamsa')
     self.proc_list = []
 
-  def _fuzz_oneshot(self, logger, ip, port, proto, payloads):
+  def _fuzz_oneshot(self, logger, ip, port, proto, stack, payloads):
     print("# oneshot mode")
-    io = remote(ip, port, typ=proto)
-    logger.log({'cmd':'con', 'ip':ip, 'port':port, 'proto':proto})
-    fuzz = self.mutator.mutate(b64d(payloads[0].encode()))
-    io.send(fuzz)
-    logger.log({'cmd':'fuz', 'data':b64e(fuzz)})
-    try:
-      ret = io.recvrepeat(0.2)
-    except EOFError:
-      pass
-    finally:
-      io.close()
-      logger.log({'cmd':'dis'})
+    for payload in payloads:
+      io = remote(ip, port, typ=proto)
+      logger.log({'cmd':'con', 'ip':ip, 'port':port, 'proto':proto})
+      fuzz = self.mutator.mutate(b64d(payload.encode()), stack)
+      io.send(fuzz)
+      logger.log({'cmd':'fuz', 'data':b64e(fuzz)})
+      try:
+        ret = io.recvrepeat(0.2)
+      except EOFError:
+        pass
+      finally:
+        io.close()
+        logger.log({'cmd':'dis'})
 
-  def _fuzz_sequence(self, logger, ip, port, proto, payloads, pileup):
+  def _fuzz_sequence(self, logger, ip, port, proto, stack, payloads, pileup):
     print("# sequence mode")
     # augmentation option
     for i in range(int(pileup)):
@@ -46,7 +47,7 @@ class Fuzzer():
         if j < i:
           fuzz = b64d(payloads[j].encode())
         else:
-          fuzz = self.mutator.mutate(b64d(payloads[j].encode()))
+          fuzz = self.mutator.mutate(b64d(payloads[j].encode()), stack)
 
         try:
           io.send(fuzz)
@@ -63,6 +64,7 @@ class Fuzzer():
     dport = p.get_dport()
     proto = p.get_proto()
     typ = p.get_type()
+    stack = p.get_stack()
     print(dport + "/" + proto)
     payloads = p.get_payloads()
     logger = Logger(dport + '-' + proto)
@@ -72,9 +74,9 @@ class Fuzzer():
       for sport in payloads:
         if typ == 'oneshots':
           for i in range(10):
-            self._fuzz_oneshot(logger, ip, dport, proto, payloads[sport])
+            self._fuzz_oneshot(logger, ip, dport, proto, stack, payloads[sport])
         elif typ == 'sequence':
-          self._fuzz_sequence(logger, ip, dport, proto, payloads[sport], pileup)
+          self._fuzz_sequence(logger, ip, dport, proto, stack, payloads[sport], pileup)
 
   def run(self, ip, port=None, proto=None, pileup=0):
     print("Protocol Set: " + str(self.ps.get_ports()))

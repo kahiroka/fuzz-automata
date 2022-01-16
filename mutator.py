@@ -11,7 +11,7 @@ class Mutator():
     #self.zzuf = pyZZUF(b'')
     self.mutator = mutator
 
-  def mutate(self, input):
+  def mutate(self, input, stack=[]):
     if self.mutator == 'radamsa':
       return self.radamsa.fuzz(input)
     #elif self.mutator == 'zzuf':

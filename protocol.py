@@ -9,6 +9,7 @@ class Protocol(dict):
     self.proto['dport'] = dport
     self.proto['type'] = type # oneshots or sequence
     self.proto['mcast'] = mcast
+    self.proto['stack'] = []
     self.proto['payloads'] = {} # {src_port_num:[payload1, payload2, ...], }
     dict.__init__(self, self.proto)
 
@@ -74,6 +75,9 @@ class Protocol(dict):
 
   def get_type(self):
     return self.proto['type']
+
+  def get_stack(self):
+    return self.proto['stack']
 
   def get_payloads(self):
     return self.proto['payloads']
