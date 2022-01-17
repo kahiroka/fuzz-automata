@@ -23,10 +23,14 @@ Finally, perform fuzzing. You can also leave HTTP fuzzing to a proxy, like ZAP.
 
     $ python3 ./fuzz-automata.py -fuzz seeds.json -ip x.x.x.x [-port #] [-proto tcp|udp] [-pileup #] [-proxy x.x.x.x:#]
 
-A log file (yyyymmdd-hhmmss.log) is generated per fuzzing and it can be used for replaying. With '-binsearch' option you can search for the payload that causes hang-up.
+A log file (yyyymmdd-hhmmss-port#.log) is generated per fuzzing and it can be used for replaying later. With '-binsearch' option you can search for the payload(s) that causes hang-up.
 
     $ python3 ./fuzz-automata.py -replay fuzz.log -ip x.x.x.x [-binsearch]
 
 With '-log2sh' option you can generate a portable shell script from a log file.
 
     $ python3 ./fuzz-automata.py -log2sh fuzz.log -out poc.sh
+
+With '-show' option you can see an overview of a seeds file.
+
+    $ python3 ./fuzz-automata.py -show seeds.json
