@@ -1,6 +1,6 @@
 import json
 from base64 import b64encode as b64e
-from protocol import Protocol
+from .protocol import Protocol
 
 class ProtocolSet():
   def __init__(self, name='', comment=''):

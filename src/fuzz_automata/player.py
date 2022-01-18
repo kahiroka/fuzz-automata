@@ -1,6 +1,6 @@
 from pwn import *
 import sys
-from logger import Logger
+from .logger import Logger
 
 class Player():
   def __init__(self, logfile, ip=None):

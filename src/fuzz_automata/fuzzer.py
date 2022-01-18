@@ -1,9 +1,9 @@
 import sys
 from pwn import *
-from protocolset import ProtocolSet
-from fanmap import FaNmap
-from mutator import Mutator
-from logger import Logger
+from .protocolset import ProtocolSet
+from .fanmap import FaNmap
+from .mutator import Mutator
+from .logger import Logger
 from multiprocessing import Process
 
 class Fuzzer():

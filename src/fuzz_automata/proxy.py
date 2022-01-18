@@ -1,7 +1,7 @@
 from pwn import *
 import sys
-from logger import Logger
-from protocolset import ProtocolSet
+from .logger import Logger
+from .protocolset import ProtocolSet
 
 class Proxy():
   def __init__(self, seedfile, target_ip, proxy='localhost:8080'):

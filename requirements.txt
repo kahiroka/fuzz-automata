@@ -1,5 +1,0 @@
-pwntools
-pyradamsa
-python-nmap
-scapy
-msgpack

@@ -1,8 +1,8 @@
 from scapy.all import *
 from base64 import b64encode as b64e
 import sys
-from protocol import Protocol
-from protocolset import ProtocolSet
+from .protocol import Protocol
+from .protocolset import ProtocolSet
 
 class ProtocolExtractor():
   def __init__(self, pcap, dstip, inc_mcast=False):

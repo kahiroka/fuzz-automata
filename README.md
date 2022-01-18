@@ -6,31 +6,30 @@ No protocol specification is required to perform fuzzing against various protoco
 # Prerequisite
 
     $ sudo apt install python3-pip nmap
-    $ pip3 install --upgrade pip setuptools wheel
-    $ pip3 install -r requirements.txt
+    $ pip install fuzz-automata-kahiroka
 
 # Usage
 
 First, collect packets to a target using MITM, then generate a seeds file as below. The target's ip address needs to be specified.
 
-    $ python3 ./fuzz-automata.py -pcap in.pcap -out seeds.json -ip x.x.x.x [-multicast]
+    $ fuzz-automata -pcap in.pcap -out seeds.json -ip x.x.x.x [-multicast]
 
 Merge seeds files if there are multiple files.
 
-    $ python3 ./fuzz-automata.py -out seeds.json [-minimize] -merge seed1.json [seed2.json ...]
+    $ fuzz-automata -out seeds.json [-minimize] -merge seed1.json [seed2.json ...]
 
 Finally, perform fuzzing. You can also leave HTTP fuzzing to a proxy, like ZAP.
 
-    $ python3 ./fuzz-automata.py -fuzz seeds.json -ip x.x.x.x [-port #] [-proto tcp|udp] [-pileup #] [-proxy x.x.x.x:#]
+    $ fuzz-automata -fuzz seeds.json -ip x.x.x.x [-port #] [-proto tcp|udp] [-pileup #] [-proxy x.x.x.x:#]
 
 A log file (yyyymmdd-hhmmss-port#.log) is generated per fuzzing and it can be used for replaying later. With '-binsearch' option you can search for the payload(s) that causes hang-up.
 
-    $ python3 ./fuzz-automata.py -replay fuzz.log -ip x.x.x.x [-binsearch]
+    $ fuzz-automata -replay fuzz.log -ip x.x.x.x [-binsearch]
 
 With '-log2sh' option you can generate a portable shell script from a log file.
 
-    $ python3 ./fuzz-automata.py -log2sh fuzz.log -out poc.sh
+    $ fuzz-automata -log2sh fuzz.log -out poc.sh
 
 With '-show' option you can see an overview of a seeds file.
 
-    $ python3 ./fuzz-automata.py -show seeds.json
+    $ fuzz-automata -show seeds.json

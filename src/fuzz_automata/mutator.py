@@ -1,6 +1,6 @@
 import pyradamsa
 #from pyZZUF import *
-from wsmask import WebSocket
+from .wsmask import WebSocket
 import msgpack
 import json
 

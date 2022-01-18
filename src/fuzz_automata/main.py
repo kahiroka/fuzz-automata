@@ -4,12 +4,12 @@ FuzZ:Automata: Seed-based Random Network Fuzzer
 '''
 from argparse import ArgumentParser
 from pwn import *
-from protocolset import ProtocolSet
-from protocolextractor import ProtocolExtractor
-from logger import Logger
-from fuzzer import Fuzzer
-from player import Player
-from proxy import Proxy
+from .protocolset import ProtocolSet
+from .protocolextractor import ProtocolExtractor
+from .logger import Logger
+from .fuzzer import Fuzzer
+from .player import Player
+from .proxy import Proxy
 
 def getArgs():
   usage = '''
