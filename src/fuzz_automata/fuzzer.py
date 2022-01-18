@@ -54,7 +54,7 @@ class Fuzzer():
           logger.log({'cmd':'fuz', 'data':b64e(fuzz)})
           ret = io.recvrepeat(0.2)
         except EOFError:
-          print("EOFError")
+          #print("EOFError")
           break
 
     io.close()
