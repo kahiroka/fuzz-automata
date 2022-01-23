@@ -1,6 +1,6 @@
 # FuzZ:Automata
 
-This is a seed-based random network fuzzer. This tool is intended to be used for IoT devices rather than web serivces.
+This is a seed-based random network fuzzer. This tool is intended to be used for embedded devices rather than web serivces.
 No protocol specification is required to perform fuzzing against various protocols, but actual packets as seeds need to be collected in advance. 
 
 # Prerequisite

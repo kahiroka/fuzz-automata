@@ -1,6 +1,8 @@
 import json
 import datetime
 from pwn import *
+from .protocol import Protocol
+from .protocolset import ProtocolSet
 
 HEADER='''#!/bin/sh
 if [ $# != 1 ]; then
@@ -115,6 +117,33 @@ class Logger():
             fw.write(log['data']+'\n')
           else:
             print("unknown cmd")
+
+  def restore(self, logfile, outfile):
+    with open(logfile, 'r') as fr:
+      ps = ProtocolSet(name='unknown')
+      protocols = {}
+      sport = 0
+      for line in fr:
+        if line[0] == '#':
+          continue
+
+        log = json.loads(line)
+        if log['cmd'] == 'con':
+          ip = log['ip']
+          dport = log['port']
+          proto = log['proto']
+          if not dport in protocols:
+            protocols[dport] = Protocol(name='unknown', proto=proto, dport=dport, type='sequence')
+        elif log['cmd'] == 'dis':
+          sport = sport + 1
+        elif log['cmd'] == 'fuz':
+          protocols[dport].append(log['data'], sport=str(sport))
+        else:
+          print("unknown cmd")
+
+      for dport in protocols:
+        ps.append(protocols[dport])
+      ps.save(outfile)
 
 def main():
   l = Logger()

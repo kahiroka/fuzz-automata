@@ -13,12 +13,13 @@ from .proxy import Proxy
 
 def getArgs():
   usage = '''
-python3 fuzz-automata.py -pcap in.pcap -out seeds.json -ip x.x.x.x [-multicast]
-python3 fuzz-automata.py -out out.json [-minimize] -merge seeds1.json [seeds2.json ...]
-python3 fuzz-automata.py -fuzz seeds.json -ip x.x.x.x [-port #] [-proto tcp|udp] [-pileup #] [-proxy ip:port]
-python3 fuzz-automata.py -replay fuzz.log -ip x.x.x.x [-binsearch]
-python3 fuzz-automata.py -log2sh fuzz.log -out poc.sh
-python3 fuzz-automata.py -show seeds.json
+fuzz-automata -pcap in.pcap -out seeds.json -ip x.x.x.x [-multicast]
+fuzz-automata -out seeds.json [-minimize] -merge seeds1.json [seeds2.json ...]
+fuzz-automata -fuzz seeds.json -ip x.x.x.x [-port #] [-proto tcp|udp] [-pileup #] [-proxy ip:port]
+fuzz-automata -replay fuzz.log -ip x.x.x.x [-binsearch]
+fuzz-automata -log2sh fuzz.log -out poc.sh
+fuzz-automata -log2seeds fuzz.log -out seeds.json
+fuzz-automata -show seeds.json
 '''
   
   argparser = ArgumentParser(usage=usage)
@@ -27,6 +28,7 @@ python3 fuzz-automata.py -show seeds.json
   argparser.add_argument('-merge', nargs='+', type=str, dest='merge', help='merge seeds json files')
   argparser.add_argument('-minimize', action='store_true', dest='minimize', help='minimize payloads (optional)')
   argparser.add_argument('-log2sh', nargs='?', type=str, dest='log2sh', help='generate a portable shell script from the log file')
+  argparser.add_argument('-log2seeds', nargs='?', type=str, dest='log2seeds', help='restore from the log file to a seeds json file')
   argparser.add_argument('-fuzz', nargs='?', type=str, dest='fuzz', help='input seeds json file')
   argparser.add_argument('-ip', nargs='?', type=str, dest='ip', help='target ip address')
   argparser.add_argument('-port', nargs='?', default=None, type=str, dest='port', help='limit to the port number (optional)')
@@ -61,6 +63,10 @@ def main():
   elif args.log2sh and args.out:
     logger = Logger()
     logger.export(args.log2sh, args.out)
+
+  elif args.log2seeds and args.out:
+    logger = Logger()
+    logger.restore(args.log2seeds, args.out)
 
   elif args.fuzz and args.ip and args.proxy:
     proxy = Proxy(args.fuzz, args.ip, args.proxy)
