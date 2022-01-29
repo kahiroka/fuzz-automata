@@ -97,27 +97,6 @@ class Logger():
         fw.write(data)
         left = left - len(data)
 
-  def export(self, logfile, outfile):
-    port = '0'
-    with open(logfile, 'r') as fr:
-      with open(outfile, 'w') as fw:
-        fw.write(HEADER)
-        for line in fr:
-          if line[0] == '#':
-            continue
-
-          log = json.loads(line)
-          if log['cmd'] == 'con':
-            fw.write(LOADER)
-            port = log['port']
-          elif log['cmd'] == 'dis':
-            fw.write(FOOTER)
-            fw.write( port + '\n')
-          elif log['cmd'] == 'fuz':
-            fw.write(log['data']+'\n')
-          else:
-            print("unknown cmd")
-
   def restore(self, logfile, outfile):
     with open(logfile, 'r') as fr:
       ps = ProtocolSet(name='unknown')

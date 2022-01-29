@@ -10,6 +10,7 @@ from .logger import Logger
 from .fuzzer import Fuzzer
 from .player import Player
 from .proxy import Proxy
+from .portablescript import PortableScript
 
 def getArgs():
   usage = '''
@@ -29,6 +30,7 @@ fuzz-automata -show seeds.json
   argparser.add_argument('-minimize', action='store_true', dest='minimize', help='minimize payloads (optional)')
   argparser.add_argument('-log2sh', nargs='?', type=str, dest='log2sh', help='generate a portable shell script from the log file')
   argparser.add_argument('-log2seeds', nargs='?', type=str, dest='log2seeds', help='restore from the log file to a seeds json file')
+  argparser.add_argument('-seeds2sh', nargs='?', type=str, dest='seeds2sh', help='generate a portable shell script from a seeds json file')
   argparser.add_argument('-fuzz', nargs='?', type=str, dest='fuzz', help='input seeds json file')
   argparser.add_argument('-ip', nargs='?', type=str, dest='ip', help='target ip address')
   argparser.add_argument('-port', nargs='?', default=None, type=str, dest='port', help='limit to the port number (optional)')
@@ -61,8 +63,12 @@ def main():
     ps.save(args.out)
 
   elif args.log2sh and args.out:
-    logger = Logger()
-    logger.export(args.log2sh, args.out)
+    pss = PortableScript()
+    pss.export_log(args.log2sh, args.out)
+
+  elif args.seeds2sh and args.out:
+    pss = PortableScript()
+    pss.export_seeds(args.seeds2sh, args.out)
 
   elif args.log2seeds and args.out:
     logger = Logger()
