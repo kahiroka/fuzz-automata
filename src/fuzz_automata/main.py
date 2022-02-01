@@ -41,6 +41,7 @@ fuzz-automata -show seeds.json
   argparser.add_argument('-binsearch', action='store_true', dest='binsearch', help='binary search for packets that cause a target to halt (optional)')
   argparser.add_argument('-multicast', action='store_true', dest='multicast', help='include ip multicast packets from others (optional)')
   argparser.add_argument('-show', nargs='?', type=str, dest='show', help='show packet info of a json file')
+  argparser.add_argument('-stir', action='store_true', dest='stir', help='stir sequential packets (optional)')
 
   return argparser.parse_args()
 
@@ -84,7 +85,7 @@ def main():
   elif args.fuzz and args.ip:
     fuzzer = Fuzzer(args.fuzz)
     try:
-      fuzzer.run(ip=args.ip, port=args.port, proto=args.proto, pileup=args.pileup)
+      fuzzer.run(ip=args.ip, port=args.port, proto=args.proto, pileup=args.pileup, stir=args.stir)
     except KeyboardInterrupt:
       print("interrupted")
 

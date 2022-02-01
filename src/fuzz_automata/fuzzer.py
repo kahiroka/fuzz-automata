@@ -1,4 +1,5 @@
 import sys
+import random
 from pwn import *
 from .protocolset import ProtocolSet
 from .fanmap import FaNmap
@@ -29,7 +30,7 @@ class Fuzzer():
         io.close()
         logger.log({'cmd':'dis'})
 
-  def _fuzz_sequence(self, logger, ip, port, proto, stack, payloads, pileup):
+  def _fuzz_sequence(self, logger, ip, port, proto, stack, payloads, pileup, stir):
     print("# sequence mode")
     # augmentation option
     for i in range(int(pileup)):
@@ -41,13 +42,17 @@ class Fuzzer():
     io = remote(ip, port, typ=proto)
     logger.log({'cmd':'con', 'ip':ip, 'port':port, 'proto':proto})
 
+    lut = list(range(len(payloads)))
+    if stir and len(lut)>3:
+      lut[1:-1] = random.sample(lut[1:-1], len(lut[1:-1]))
+
     # heuristic: shallow-deep fuzzing
     for i in range(len(payloads)):
       for j in range(len(payloads)):
         if j < i:
-          fuzz = b64d(payloads[j].encode())
+          fuzz = b64d(payloads[lut[j]].encode())
         else:
-          fuzz = self.mutator.mutate(b64d(payloads[j].encode()), stack)
+          fuzz = self.mutator.mutate(b64d(payloads[lut[j]].encode()), stack)
 
         try:
           io.send(fuzz)
@@ -60,7 +65,7 @@ class Fuzzer():
     io.close()
     logger.log({'cmd':'dis'})
 
-  def run_mp(self, p, ip, pileup):
+  def run_mp(self, p, ip, pileup, stir):
     dport = p.get_dport()
     proto = p.get_proto()
     typ = p.get_type()
@@ -76,9 +81,9 @@ class Fuzzer():
           for i in range(10):
             self._fuzz_oneshot(logger, ip, dport, proto, stack, payloads[sport])
         elif typ == 'sequence':
-          self._fuzz_sequence(logger, ip, dport, proto, stack, payloads[sport], pileup)
+          self._fuzz_sequence(logger, ip, dport, proto, stack, payloads[sport], pileup, stir)
 
-  def run(self, ip, port=None, proto=None, pileup=0):
+  def run(self, ip, port=None, proto=None, pileup=0, stir=False):
     print("Protocol Set: " + str(self.ps.get_ports()))
     if port == None:
       fn = FaNmap()
@@ -99,7 +104,7 @@ class Fuzzer():
       dport = p.get_dport()
       proto = p.get_proto()
       if dport in active_ports[proto]:
-        proc = Process(target=self.run_mp, args=(p, ip, pileup))
+        proc = Process(target=self.run_mp, args=(p, ip, pileup, stir))
         proc.start()
         self.proc_list.append(proc)
 
