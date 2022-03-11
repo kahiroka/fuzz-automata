@@ -46,7 +46,24 @@ class Fuzzer():
     if stir and len(lut)>3:
       lut[1:-1] = random.sample(lut[1:-1], len(lut[1:-1]))
 
+    # heuristic: spot fuzzing
+    print("# spot")
+    for i in range(len(payloads)):
+      for j in range(len(payloads)):
+        if j == i:
+          fuzz = self.mutator.mutate(b64d(payloads[lut[j]].encode()), stack)
+        else:
+          fuzz = b64d(payloads[lut[j]].encode())
+
+        try:
+          io.send(fuzz)
+          logger.log({'cmd':'fuz', 'data':b64e(fuzz)})
+          ret = io.recvrepeat(0.2)
+        except EOFError:
+          break
+
     # heuristic: shallow-deep fuzzing
+    print("# shallow-deep")
     for i in range(len(payloads)):
       for j in range(len(payloads)):
         if j < i:
@@ -59,7 +76,6 @@ class Fuzzer():
           logger.log({'cmd':'fuz', 'data':b64e(fuzz)})
           ret = io.recvrepeat(0.2)
         except EOFError:
-          #print("EOFError")
           break
 
     io.close()
@@ -78,10 +94,10 @@ class Fuzzer():
     while True:
       for sport in payloads:
         if typ == 'oneshots':
-          for i in range(10):
-            self._fuzz_oneshot(logger, ip, dport, proto, stack, payloads[sport])
+          self._fuzz_oneshot(logger, ip, dport, proto, stack, payloads[sport])
         elif typ == 'sequence':
           self._fuzz_sequence(logger, ip, dport, proto, stack, payloads[sport], pileup, stir)
+          pileup = 0
 
   def run(self, ip, port=None, proto=None, pileup=0, stir=False):
     print("Protocol Set: " + str(self.ps.get_ports()))

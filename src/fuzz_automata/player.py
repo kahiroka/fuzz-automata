@@ -45,7 +45,11 @@ class Player():
           else:
             io = remote(self.ip, log['port'], typ=log['proto'])
         elif log['cmd'] == 'fuz':
-          io.send(b64d(log['data'].encode()))
+          try:
+            io.send(b64d(log['data'].encode()))
+          except EOFError:
+            pass
+
           try:
             ret = io.recvrepeat(0.2)
           except EOFError:
