@@ -98,6 +98,9 @@ class Fuzzer():
         elif typ == 'sequence':
           self._fuzz_sequence(logger, ip, dport, proto, stack, payloads[sport], pileup, stir)
           pileup = 0
+        else:
+          print("Unknown Type: " + typ)
+          return
 
   def run(self, ip, port=None, proto=None, pileup=0, stir=False):
     print("Protocol Set: " + str(self.ps.get_ports()))
